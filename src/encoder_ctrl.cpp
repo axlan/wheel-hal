@@ -13,6 +13,9 @@ using namespace wheel_hal;
 #define WHEEL_HAL_IRAM_ATTR
 #endif
 
+// While ESP32 code has FunctionalInterrupt.h, to support ATmega Arduino
+// architectures, map each instance to its own interrupt handler.
+
 typedef void (*voidFuncPtr)(void);
 
 static constexpr size_t MAX_ENCODER_INSTANCES = 4;
@@ -42,6 +45,7 @@ SinglePinEncoderCtrl::SinglePinEncoderCtrl(float wheel_radius_m,
       pin_mode_(pin_mode),
       irq_mode_(irq_mode),
       ticks_to_m_ratio_(wheel_radius_m * 2.0 * M_PI / float(ticks_per_rotation)),
+      // Capture the current encoder index and increment for the next instance.
       static_encoder_index_(GetStaticEncoderCount()++),
       last_poll_time_us_(micros())
 {
