@@ -3,7 +3,6 @@
 #include <math.h>
 
 #include <Arduino.h>
-#include <FunctionalInterrupt.h>
 
 using namespace wheel_hal;
 
@@ -14,6 +13,26 @@ using namespace wheel_hal;
 #define WHEEL_HAL_IRAM_ATTR
 #endif
 
+typedef void (*voidFuncPtr)(void);
+
+static constexpr size_t MAX_ENCODER_INSTANCES = 4;
+
+static volatile unsigned long encoder_ticks[MAX_ENCODER_INSTANCES] = {0};
+
+// Wrap singleton value in function to avoid initialization order issues.
+static unsigned &GetStaticEncoderCount()
+{
+  static unsigned static_encoder_count = 0;
+  return static_encoder_count;
+}
+
+static void handler0() { ++encoder_ticks[0]; }
+static void handler1() { ++encoder_ticks[1]; }
+static void handler2() { ++encoder_ticks[2]; }
+static void handler3() { ++encoder_ticks[3]; }
+
+static constexpr voidFuncPtr handlers[MAX_ENCODER_INSTANCES] = {handler0, handler1, handler2, handler3};
+
 SinglePinEncoderCtrl::SinglePinEncoderCtrl(float wheel_radius_m,
                                            unsigned int ticks_per_rotation,
                                            uint8_t encoder_pin,
@@ -22,35 +41,47 @@ SinglePinEncoderCtrl::SinglePinEncoderCtrl(float wheel_radius_m,
     : encoder_pin_(encoder_pin),
       pin_mode_(pin_mode),
       irq_mode_(irq_mode),
-      ticks_to_m_ratio(wheel_radius_m * 2.0 * M_PI / float(ticks_per_rotation)),
+      ticks_to_m_ratio_(wheel_radius_m * 2.0 * M_PI / float(ticks_per_rotation)),
+      static_encoder_index_(GetStaticEncoderCount()++),
       last_poll_time_us_(micros())
 {
 }
 
-SinglePinEncoderCtrl::~SinglePinEncoderCtrl() {
+SinglePinEncoderCtrl::~SinglePinEncoderCtrl()
+{
   detachInterrupt(encoder_pin_);
 }
 
 void SinglePinEncoderCtrl::SetupPins()
 {
-  pinMode(this->encoder_pin_, this->pin_mode_);
-  attachInterrupt(digitalPinToInterrupt(this->encoder_pin_),
-                  [this]() WHEEL_HAL_IRAM_ATTR // NOLINT
-                  {                            // NOLINT
-                    this->encoder_ticks_++;
-                  },
-                  this->irq_mode_);
+  if (static_encoder_index_ >= MAX_ENCODER_INSTANCES)
+  {
+    // Add error reporting logic.
+  }
+  else
+  {
+    pinMode(this->encoder_pin_, this->pin_mode_);
+    attachInterrupt(digitalPinToInterrupt(this->encoder_pin_),
+                    handlers[static_encoder_index_],
+                    this->irq_mode_);
+  }
 }
 
 EncoderMeasurement SinglePinEncoderCtrl::GetEncoderMeasurement(bool is_in_reverse)
 {
+  if (static_encoder_index_ >= MAX_ENCODER_INSTANCES)
+  {
+    return EncoderMeasurement();
+  }
+
   noInterrupts();
-  unsigned local_encoder_ticks = encoder_ticks_;
-  encoder_ticks_ = 0;
+  unsigned local_encoder_ticks = encoder_ticks[static_encoder_index_];
+  encoder_ticks[static_encoder_index_] = 0;
   interrupts();
 
-  float delta_pos_m = float(local_encoder_ticks) * ticks_to_m_ratio;
-  if (is_in_reverse) {
+  float delta_pos_m = float(local_encoder_ticks) * ticks_to_m_ratio_;
+  if (is_in_reverse)
+  {
     delta_pos_m = -delta_pos_m;
   }
 

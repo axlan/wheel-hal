@@ -98,12 +98,12 @@ namespace wheel_hal
         EncoderMeasurement GetEncoderMeasurement(bool is_in_reverse = false) override;
 
     private:
-        const uint8_t encoder_pin_;   ///< GPIO pin for encoder input.
-        const uint8_t pin_mode_;      ///< Pin mode (INPUT, etc).
-        const int irq_mode_;          ///< Interrupt mode (RISING, etc).
-        const float ticks_to_m_ratio; ///< Conversion ratio from ticks to meters.
+        const uint8_t encoder_pin_;    ///< GPIO pin for encoder input.
+        const uint8_t pin_mode_;       ///< Pin mode (INPUT, etc).
+        const int irq_mode_;           ///< Interrupt mode (RISING, etc).
+        const float ticks_to_m_ratio_; ///< Conversion ratio from ticks to meters.
+        const unsigned static_encoder_index_;   ///< This object's index to the static encoder table.
 
-        volatile unsigned long encoder_ticks_ = 0; ///< Tick count, incremented by interrupt.
         unsigned long last_poll_time_us_ = 0;      ///< Last poll time in microseconds.
     };
 }
