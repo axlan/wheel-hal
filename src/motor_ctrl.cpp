@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+#include <math.h>
+
 using namespace wheel_hal;
 
 uint8_t AT8236MotorCtrl::ConvertToPWMValue(float percent)
@@ -12,9 +14,9 @@ uint8_t AT8236MotorCtrl::ConvertToPWMValue(float percent)
     }
     else
     {
-        float abs_ratio = std::abs(percent) / 100.0;
+        float abs_ratio = abs(percent) / 100.0;
         float range = (255 - min_active_pwm_value_);
-        return static_cast<uint8_t>(std::round(range * abs_ratio) + min_active_pwm_value_);
+        return static_cast<uint8_t>(round(range * abs_ratio) + min_active_pwm_value_);
     }
 }
 
