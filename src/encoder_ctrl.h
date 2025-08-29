@@ -1,7 +1,6 @@
 #pragma once
 
-#include <atomic>
-#include <cstdint>
+#include <stdint.h>
 #include <Arduino.h>
 
 namespace wheel_hal
@@ -84,7 +83,6 @@ namespace wheel_hal
          * Configures the pin and reserves the hardware interrupt for counting ticks.
          *
          * Reserves the interrupt for the specified pin and binds it to this instance.
-         * The interrupt handler increments the tick count atomically.
          */
         void SetupPins() override;
 

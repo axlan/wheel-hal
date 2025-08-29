@@ -2,8 +2,6 @@
 
 #include <Arduino.h>
 
-#include <cmath>
-
 using namespace wheel_hal;
 
 uint8_t AT8236MotorCtrl::ConvertToPWMValue(float percent)

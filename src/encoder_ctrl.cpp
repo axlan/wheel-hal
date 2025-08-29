@@ -1,6 +1,6 @@
 #include "encoder_ctrl.h"
 
-#include <cmath>
+#include <math.h>
 
 #include <Arduino.h>
 #include <FunctionalInterrupt.h>
@@ -22,7 +22,7 @@ SinglePinEncoderCtrl::SinglePinEncoderCtrl(float wheel_radius_m,
     : encoder_pin_(encoder_pin),
       pin_mode_(pin_mode),
       irq_mode_(irq_mode),
-      ticks_to_m_ratio(wheel_radius_m * 2.0 * PI / float(ticks_per_rotation)),
+      ticks_to_m_ratio(wheel_radius_m * 2.0 * M_PI / float(ticks_per_rotation)),
       last_poll_time_us_(micros())
 {
 }

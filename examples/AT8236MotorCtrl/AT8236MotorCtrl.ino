@@ -30,8 +30,8 @@ static constexpr int PWM_THRESHOLD = 100;
 
 using namespace wheel_hal;
 
-SinglePinEncoderCtrl left_encoder(WHEEL_RADIUS, TICK_PER_REVOLUTION_LW, PIN_L_ENCODER, INPUT, FALLING);
-SinglePinEncoderCtrl right_encoder(WHEEL_RADIUS, TICK_PER_REVOLUTION_RW, PIN_R_ENCODER, INPUT, FALLING);
+SinglePinEncoderCtrl left_encoder(WHEEL_RADIUS, TICK_PER_REVOLUTION, PIN_L_ENCODER, INPUT, FALLING);
+SinglePinEncoderCtrl right_encoder(WHEEL_RADIUS, TICK_PER_REVOLUTION, PIN_R_ENCODER, INPUT, FALLING);
 
 AT8236MotorCtrl left_motor(PIN_L_FORW, PIN_L_BACK, PWM_THRESHOLD);
 AT8236MotorCtrl right_motor(PIN_R_FORW, PIN_R_BACK, PWM_THRESHOLD);
@@ -53,12 +53,12 @@ void loop()
   Serial.println("Left");
   auto left = left_encoder.GetEncoderMeasurement();
   Serial.println(left.delta_pos_m * 1000.0);
-  Serial.println(left.time_elapsed_sec);
+  Serial.println(left.delta_time_sec);
 
   Serial.println("Right");
   auto right = right_encoder.GetEncoderMeasurement();
   Serial.println(right.delta_pos_m * 1000.0);
-  Serial.println(right.time_elapsed_sec);
+  Serial.println(right.delta_time_sec);
 
   Serial.println();
 
